@@ -72,6 +72,8 @@ byte heart[8] = {
   0b00000
 };
 
+//bonjour
+
 byte smiley[8] = {
   0b00000,
   0b00000,
