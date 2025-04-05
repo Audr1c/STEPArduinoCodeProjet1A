@@ -50,111 +50,94 @@ LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 // make some custom characters:
 byte one[8] = {
-  0b11111,
-  0b11111,
-  0b11111,
-  0b11111,
-  0b11111,
-  0b11111,
-  0b11111,
-  0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
 };
 
+// cree un varaible qui decide si on est en mode 1 ou 2
+int mode = 1;
 
-byte heart[8] = {
-  0b00000,
-  0b01010,
-  0b11111,
-  0b11111,
-  0b11111,
-  0b01110,
-  0b00100,
-  0b00000
-};
+unsigned long end, deltaT, somme, frequency;
+const unsigned int length = 10;
+unsigned long times[length];
+int currentpos = 0;
 
-//bonjour :(
-
-byte smiley[8] = {
-  0b00000,
-  0b00000,
-  0b01010,
-  0b00000,
-  0b00000,
-  0b10001,
-  0b01110,
-  0b00000
-};
-
-byte frownie[8] = {
-  0b00000,
-  0b00000,
-  0b01010,
-  0b00000,
-  0b00000,
-  0b00000,
-  0b01110,
-  0b10001
-};
-
-byte armsDown[8] = {
-  0b00100,
-  0b01010,
-  0b00100,
-  0b00100,
-  0b01110,
-  0b10101,
-  0b00100,
-  0b01010
-};
-
-byte armsUp[8] = {
-  0b00100,
-  0b01010,
-  0b00100,
-  0b10101,
-  0b01110,
-  0b00100,
-  0b00100,
-  0b01010
-};
-
-void setup() {
-  // initialize LCD and set up the number of columns and rows:
+void setup()
+{
+  mode = 1;
+  // initailaise times array
+  for (int i = 0; i < length; i++)
+  {
+    times[i] = 0;
+  }
+  // initialize LCD
   lcd.begin(16, 2);
-
-  // create a new character
-  lcd.createChar(0, heart);
-  // create a new character
-  lcd.createChar(1, smiley);
-  // create a new character
-  lcd.createChar(2, frownie);
-  // create a new character
-  lcd.createChar(3, armsDown);
-  // create a new character
-  lcd.createChar(4, armsUp);
-
-  // set the cursor to the top left
   lcd.setCursor(0, 0);
+  lcd.createChar(1, one);
 
-  // Print a message to the lcd.
-  lcd.print("I ");
-  lcd.write(byte(0));  // when calling lcd.write() '0' must be cast as a byte
-  lcd.print(" Arduino! ");
-  lcd.write((byte)1);
+  end = millis();
+  somme = 0;
+
+  // for debugging purposes
+  Serial.begin(9600);
 }
 
-void loop() {
-  // read the potentiometer on A0:
-  int sensorReading = analogRead(A0);
-  // map the result to 200 - 1000:
-  int delayTime = map(sensorReading, 0, 1023, 200, 1000);
-  // set the cursor to the bottom row, 5th position:
-  lcd.setCursor(4, 1);
-  // draw the little man, arms down:
-  lcd.write(3);
-  //delay(delayTime);
-  lcd.setCursor(4, 1);
-  // draw him arms up:
-  lcd.write(4);
-  //delay(delayTime);
+void loop()
+{
+
+  // calculate time of loop and modifie times array
+  deltaT = millis() - end;
+  end = millis();
+  somme += deltaT - times[(currentpos + 1) % length];
+  times[currentpos] = deltaT;
+  currentpos++;
+  currentpos %= length;
+  frequency = 1000 / (somme / length); // Hz
+
+  // on every 2 second change mode
+  if (int((millis()) / 1000) % 2 == 0)
+  {
+    mode = 2;
+  }
+  else
+  {
+    mode = 1;
+  }
+  // set one line in full One
+  for (int i = 0; i < 16; i++)
+  {
+    lcd.setCursor(i, mode % 2);
+    lcd.write((byte)1);
+  }
+  // set the four caracters of second line with random caracters
+  for (int i = 0; i < 4; i++)
+  {
+    lcd.setCursor(i, 1 - mode % 2);
+    lcd.write(random(32, 127));
+  }
+  // write the frequency on the left side of the secon line
+  // lcd.rightToLeft();
+  lcd.setCursor(5, 1 - mode % 2);
+  lcd.print("Freq: ");
+  lcd.print(frequency);
+  lcd.print("Hz");
+  // lcd.leftToRight();
+
+  // debug
+  // print times array
+  /*
+  Serial.print("times: ");
+  for (int i = 0; i < length; i++)
+  {
+    Serial.print(times[i]);
+    Serial.print("  ");
+  }
+  Serial.println(" Freq = " + String(frequency) + "Hz");
+  */
 }
