@@ -42,4 +42,16 @@ void writeFrame(struct pix)
 
 void writeArray(struct pix[300], uint16_t length)
 {
+    writeOct(0);
+    writeOct(0);
+    writeOct(0);
+    writeOct(0);
+    for(uint16_t i  = 0; i <= length; i++)
+    {
+        writeFrame(pix[i])
+    }
+    writeOct(0xFF);
+    writeOct(0xFF);
+    writeOct(0xFF);
+    writeOct(0xFF);
 }
