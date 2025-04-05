@@ -28,19 +28,19 @@ void loop()
 
 void writeOct()
 {
-
-
-
-}
-
-void writePix()
-{
-
-
     
+
+
 }
 
-void writeArray(struct pix[300], )
+void writePix(struct pix)
+{
+    writeOct(pix.r);
+    writeOct(pix.g);
+    writeOct(pix.b);
+}
+
+void writeArray(struct pix[300], uint16_t length)
 {
 
 
